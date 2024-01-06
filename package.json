@@ -1,0 +1,54 @@
+{
+  "name": "manga-ai-repairer",
+  "version": "0.2.1",
+  "description": "需要下载并安装后台程序。仅支持windows。网站暂时只支持漫画柜。",
+  "main": "userscript/index.user.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack/prod.ts",
+    "dev": "webpack --config webpack/dev.ts",
+    "build:watch": "webpack --watch --config webpack/prod.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pboymt/userscript-typescript-template.git"
+  },
+  "keywords": [],
+  "author": "pboymt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pboymt/userscript-typescript-template/issues"
+  },
+  "homepage": "https://github.com/pboymt/userscript-typescript-template#readme",
+  "devDependencies": {
+    "@types/node": "^18.15.11",
+    "@types/prettier": "^2.7.0",
+    "@types/tampermonkey": "^4.0.5",
+    "@types/webpack": "^5.28.0",
+    "prettier": "^2.7.1",
+    "terser-webpack-plugin": "^5.3.6",
+    "ts-loader": "^9.2.6",
+    "ts-node": "^10.4.0",
+    "typescript": "^5.0.4",
+    "webpack": "^5.64.3",
+    "webpack-cli": "^5.0.1",
+    "webpack-merge": "^5.8.0"
+  },
+  "userscript": {
+    "name":"漫画网站画质AI修复",
+    "author":"call_duck",
+    "require-template": "https://cdn.jsdelivr.net/npm/${dependencyName}@${dependencyVersion}",
+    "namespace": "http://tampermonkey.net/",
+    "license": "https://opensource.org/licenses/MIT",
+    "match": [
+      "https://www.manhuagui.com/comic/**"
+    ],
+    "grant": [
+      "GM_xmlhttpRequest","GM_getValue","GM_setValue","GM.getValue","GM.setValue","GM_addStyle"
+    ],
+    "run-at":"document-end"
+  },
+  "dependencies": {
+
+  }
+}
