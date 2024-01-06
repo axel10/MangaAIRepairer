@@ -75,9 +75,6 @@ import GM_config from "./gm_config";
       return
     }
     isShowError = true
-    let timer = setTimeout(() => {
-      stateBar.style.display = 'none'
-    }, 10000);
     stateBar.style.display = "block";
     stateBar.innerHTML =
       `
@@ -88,10 +85,6 @@ import GM_config from "./gm_config";
     stateBar.querySelector('.__callLink')!.addEventListener("click", function () {
       stateBar.querySelector(".msg")!.innerHTML =
         "如果应用未启动则需安装应用。如果更新后无法调起后端应用请重新执行安装脚本。详情见文档。 ";
-      clearTimeout(timer)
-      setTimeout(() => {
-        stateBar.style.display = 'none'
-      }, 10000);
     });
   }
 

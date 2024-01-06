@@ -1,6 +1,6 @@
 {
   "name": "manga-ai-repairer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "修复漫画网站上的低清漫画。需要下载并安装后台程序。仅支持windows。网站暂时只支持漫画柜。",
   "main": "userscript/index.user.js",
   "scripts": {
