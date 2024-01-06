@@ -3,13 +3,30 @@ import GM_config from "./gm_config";
 (function () {
   "use strict";
 
-  if (!location.href.match(/\/comic\/[0-9]+\/[0-9]+\.html/)) {
+  const urlRegs = [
+    /\/comic\/[0-9]+\/[0-9]+\.html/,
+    /\/pchapter\//
+  ]
+  let urlFlag = false
+  for (let index = 0; index < urlRegs.length; index++) {
+    const reg = urlRegs[index];
+    if (location.href.match(reg)) {
+      urlFlag = true
+    }
+  }
+  if (!urlFlag) {
     return
   }
+
+
+  // if (!location.href.match(/\/comic\/[0-9]+\/[0-9]+\.html/)) {
+  //   return
+  // }
 
   let queueLength = 0;
   let stop = true;
   let scale = 4;
+  let isShowError = false
 
   const gmc: any = new GM_config({
     id: "MyConfig", // The id used for this instance of GM_config
@@ -19,7 +36,7 @@ import GM_config from "./gm_config";
       // This is the id of the field
       scale: {
         label: "质量", // Appears next to field
-        title: "质量越高速度越慢。默认“4”",
+        title: "质量越高生成的文件越大。默认“4”",
         type: "select", // Makes this setting a text field
         options: ["2", "3", "4"],
         default: "4", // Default value if user doesn't change it
@@ -54,29 +71,35 @@ import GM_config from "./gm_config";
   }
 
   function showErrorStateBar() {
+    if (isShowError) {
+      return
+    }
+    isShowError = true
+    let timer = setTimeout(() => {
+      stateBar.style.display = 'none'
+    }, 10000);
     stateBar.style.display = "block";
-
     stateBar.innerHTML =
-      '<span class="msg">本机后台AI画质修复程序未运行，请检查后台程序状态。 </span>';
-    var linkArea = document.createElement("span");
-    linkArea.innerHTML =
-      '<a href="https://greasyfork.org/zh-CN/scripts/483769-%E6%BC%AB%E7%94%BB%E7%BD%91%E7%AB%99%E7%94%BB%E8%B4%A8ai%E4%BF%AE%E5%A4%8D" style="color:blue" target="_blank">说明文档 <a/>';
-    stateBar.appendChild(linkArea);
-    var launchBackAppLink = document.createElement("a");
-    launchBackAppLink.innerHTML = "尝试调起应用 ";
-    launchBackAppLink.href = "mangaAIRepairerBackend:a";
-    launchBackAppLink.style.color = "blue";
-    launchBackAppLink.addEventListener("click", function () {
+      `
+      <span class="msg">本机后台AI画质修复程序未运行，请检查后台程序状态。 </span>
+      <a href="https://greasyfork.org/zh-CN/scripts/483769-%E6%BC%AB%E7%94%BB%E7%BD%91%E7%AB%99%E7%94%BB%E8%B4%A8ai%E4%BF%AE%E5%A4%8D" style="color:blue" target="_blank">说明文档 <a/>
+      <a class="__callLink" href="mangaAIRepairerBackend:a" style="color:blue">尝试调起应用 <a/>
+      `;
+    stateBar.querySelector('.__callLink')!.addEventListener("click", function () {
       stateBar.querySelector(".msg")!.innerHTML =
-        "如果应用未启动则需安装应用。详情见文档。 ";
+        "如果应用未启动则需安装应用。如果更新后无法调起后端应用请重新执行安装脚本。详情见文档。 ";
+      clearTimeout(timer)
+      setTimeout(() => {
+        stateBar.style.display = 'none'
+      }, 10000);
     });
-    linkArea.appendChild(launchBackAppLink);
   }
 
   function handleImg(img: HTMLImageElement) {
     if (img.dataset.handled) {
       return;
     }
+
     queueLength++;
     refreshStateBar();
 
@@ -103,7 +126,10 @@ import GM_config from "./gm_config";
             data: JSON.stringify({ data: base64, level: scale, scale }),
             // data: `{"data":"${base64}"}`,
             onload: function (r) {
-              img.src = "data:image/jpg;base64," + r.response;
+              const token = r.response
+              img.src = `http://127.0.0.1:31485/get_img?token=${token}`
+              // img.src = "https://cdn.britannica.com/84/73184-050-05ED59CB/Sunflower-field-Fargo-North-Dakota.jpg"
+              // img.src = "data:image/webp;base64," + r.response;
               queueLength--;
               refreshStateBar();
             },
@@ -124,6 +150,7 @@ import GM_config from "./gm_config";
   function checkAlive() {
     return new Promise<void>((res, rej) => {
       try {
+        // todo 设置timeout
         GM_xmlhttpRequest({
           method: "GET",
           url: "http://localhost:31485",
@@ -148,7 +175,7 @@ import GM_config from "./gm_config";
   stateBar.style.fontSize = "14px";
   stateBar.style.display = "none";
   stateBar.style.left = "20px";
-  stateBar.style.bottom = "40px";
+  stateBar.style.bottom = "70px";
 
   document.body.appendChild(stateBar);
 
@@ -201,23 +228,23 @@ import GM_config from "./gm_config";
       if (!stop) {
         const allImg = Array.from(document.getElementsByTagName("img"));
         allImg.forEach((img) => {
-          if (img.offsetWidth >= 500) {
+          if (img.offsetWidth >= 400 && !img.src.match(/.*\.gif/) && !img.dataset.handled) {
             waitImg(img, handleImg);
           }
         });
       }
-    }, 300);
+    }, 1000);
 
     // 检测后台是否存活
     setInterval(() => {
       checkAlive()
         .then(() => {
           stop = false;
+          isShowError = false
         })
         .catch(() => {
           stop = true;
           showErrorStateBar();
-
         });
     }, 1000);
   };
