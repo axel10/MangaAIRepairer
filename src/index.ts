@@ -46,6 +46,13 @@ import GM_config from "./gm_config";
         type: "select", // Makes this setting a text field
         options: ["realesr-animevideov3（速度快，默认）", "realesrgan-x4plus-anime（质量好，更慢）"],
         default: "realesr-animevideov3（速度快，默认）", // Default value if user doesn't change it
+      },
+      stateBarStyle: {
+        label: "状态栏样式", // Appears next to field
+        title: "设置状态栏显示的信息",
+        type: "select", // Makes this setting a text field
+        options: ["完整", '精简', '不显示'],
+        default: "完整", // Default value if user doesn't change it
       }
     },
     events: {
@@ -68,12 +75,29 @@ import GM_config from "./gm_config";
   }
 
   function refreshStateBar() {
+
+    const stateBarStyle: string = gmc.fields.stateBarStyle.value
+    if (stateBarStyle === '不显示') {
+      // stateBar.style.display = "none";
+      return
+    }
+
+
     if (queueLength === 0 && stop === false) {
       stateBar.style.display = "none";
     } else {
       stateBar.style.display = "block";
     }
-    stateBar.innerHTML = `正在处理 ${queueLength} 张图片`;
+    let model: string = gmc.fields.model.value;
+    model = model.replace(/(\（.+\）)/g, '');
+
+    if (stateBarStyle === '精简') {
+      stateBar.innerHTML = `正在处理 ${queueLength} 张图片`;
+    } else {
+      stateBar.innerHTML = `正在处理 ${queueLength} 张图片<br><div style="font-size:10px;line-height:12px">当前模型：<br>${model}</div>`;
+
+    }
+
   }
 
   function showErrorStateBar() {
@@ -205,7 +229,7 @@ import GM_config from "./gm_config";
   toolBar.style.opacity = "0.5";
   toolBar.style.display = "none";
   toolBar.style.marginLeft = "30px";
-  toolBar.style.marginTop = "150px";
+  toolBar.style.marginTop = "100px";
 
   const hover = document.createElement("div");
   hover.style.width = "200px";
@@ -264,5 +288,10 @@ import GM_config from "./gm_config";
           showErrorStateBar();
         });
     }, 1000);
+
+    GM_registerMenuCommand('AI缩放选项', function () {
+      gmc.open()
+    })
+
   };
 })();

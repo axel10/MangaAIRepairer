@@ -45,7 +45,7 @@
       "https://manhuabika.com/pchapter/**"
     ],
     "grant": [
-      "GM_xmlhttpRequest","GM_getValue","GM_setValue","GM.getValue","GM.setValue","GM_addStyle"
+      "GM_xmlhttpRequest","GM_getValue","GM_setValue","GM.getValue","GM.setValue","GM_addStyle","GM_registerMenuCommand"
     ],
     "run-at":"document-end"
   },
