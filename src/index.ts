@@ -25,7 +25,6 @@ import GM_config from "./gm_config";
 
   let queueLength = 0;
   let stop = true;
-  let scale = 4;
   let isShowError = false
 
   const gmc: any = new GM_config({
@@ -35,12 +34,19 @@ import GM_config from "./gm_config";
     fields: {
       // This is the id of the field
       scale: {
-        label: "质量", // Appears next to field
-        title: "质量越高生成的文件越大。默认“4”",
+        label: "缩放倍数", // Appears next to field
+        title: "默认“4”",
         type: "select", // Makes this setting a text field
         options: ["2", "3", "4"],
         default: "4", // Default value if user doesn't change it
       },
+      model: {
+        label: "模型", // Appears next to field
+        title: "realesrgan-x4plus-anime拥有比默认模型realesr-animevideov3更好的质量以及更慢的速度。推荐高端显卡用户使用。",
+        type: "select", // Makes this setting a text field
+        options: ["realesr-animevideov3（速度快，默认）", "realesrgan-x4plus-anime（质量好，更慢）"],
+        default: "realesr-animevideov3（速度快，默认）", // Default value if user doesn't change it
+      }
     },
     events: {
       save: function () {
@@ -110,13 +116,25 @@ import GM_config from "./gm_config";
         let oFileReader = new FileReader();
         oFileReader.onloadend = function () {
           let base64 = oFileReader.result;
+
+          let model: string = gmc.fields.model.value;
+
+          if (model.indexOf('realesrgan-x4plus-anime') !== -1) {
+            model = 'realesrgan-x4plus-anime'
+          } else {
+            model = 'realesr-animevideov3'
+          }
+
+          let scale = gmc.fields.scale.value;
+
+
           GM_xmlhttpRequest({
             method: "POST",
             url: "http://localhost:31485/handle_img",
             headers: {
               "Content-Type": "application/json; charset=UTF-8",
             },
-            data: JSON.stringify({ data: base64, level: scale, scale }),
+            data: JSON.stringify({ data: base64, level: scale, scale, model }),
             // data: `{"data":"${base64}"}`,
             onload: function (r) {
               const token = r.response
@@ -147,6 +165,7 @@ import GM_config from "./gm_config";
         GM_xmlhttpRequest({
           method: "GET",
           url: "http://localhost:31485",
+          timeout: 1000,
           onload: function (r) {
             res();
           },
@@ -208,7 +227,7 @@ import GM_config from "./gm_config";
   });
 
   gmc.onInit = () => {
-    scale = gmc.fields.scale.value;
+
     checkAlive()
       .then(() => {
         stop = false;
@@ -232,6 +251,11 @@ import GM_config from "./gm_config";
     setInterval(() => {
       checkAlive()
         .then(() => {
+
+          if (stop) {
+            stateBar.style.display = 'none'
+          }
+
           stop = false;
           isShowError = false
         })
