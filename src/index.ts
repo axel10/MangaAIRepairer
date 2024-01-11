@@ -19,7 +19,10 @@ import GM_config from "./gm_config";
     return
   }
 
+<<<<<<< HEAD
   console.log(1)
+=======
+>>>>>>> 545b686d528c7a8eeb95a431ebbeea48848f8115
 
   // if (!location.href.match(/\/comic\/[0-9]+\/[0-9]+\.html/)) {
   //   return
@@ -27,7 +30,7 @@ import GM_config from "./gm_config";
 
   let queueLength = 0;
   let stop = true;
-  let scale = 4;
+  let isShowError = false
 
   const gmc: any = new GM_config({
     id: "MyConfig", // The id used for this instance of GM_config
@@ -36,12 +39,26 @@ import GM_config from "./gm_config";
     fields: {
       // This is the id of the field
       scale: {
-        label: "质量", // Appears next to field
-        title: "质量越高速度越慢。默认“4”",
+        label: "缩放倍数", // Appears next to field
+        title: "默认“4”",
         type: "select", // Makes this setting a text field
         options: ["2", "3", "4"],
         default: "4", // Default value if user doesn't change it
       },
+      model: {
+        label: "模型", // Appears next to field
+        title: "realesrgan-x4plus-anime拥有比默认模型realesr-animevideov3更好的质量以及更慢的速度。推荐高端显卡 用户使用。",
+        type: "select", // Makes this setting a text field
+        options: ["realesr-animevideov3（速度快，默认）", "realesrgan-x4plus-anime（质量好，更慢）"],
+        default: "realesr-animevideov3（速度快，默认）", // Default value if user doesn't change it
+      },
+      stateBarStyle: {
+        label: "状态栏样式", // Appears next to field
+        title: "设置状态栏显示的信息",
+        type: "select", // Makes this setting a text field
+        options: ["完整", '精简', '不显示'],
+        default: "完整", // Default value if user doesn't change it
+      }
     },
     events: {
       save: function () {
@@ -50,7 +67,7 @@ import GM_config from "./gm_config";
     },
   });
 
-  GM_addStyle("#MyConfig {width:auto!important;height:auto!important;}");
+  GM_addStyle("#MyConfig {width:500px!important;height:180px!important;}");
 
   function waitImg(img: HTMLImageElement, fun: (...args: any[]) => void) {
     setTimeout(() => {
@@ -63,18 +80,39 @@ import GM_config from "./gm_config";
   }
 
   function refreshStateBar() {
+
+    const stateBarStyle: string = gmc.fields.stateBarStyle.value
+    if (stateBarStyle === '不显示') {
+      // stateBar.style.display = "none";
+      return
+    }
+
+
     if (queueLength === 0 && stop === false) {
       stateBar.style.display = "none";
     } else {
       stateBar.style.display = "block";
     }
-    stateBar.innerHTML = `正在处理 ${queueLength} 张图片`;
+    let model: string = gmc.fields.model.value;
+    model = model.replace(/(\（.+\）)/g, '');
+
+    if (stateBarStyle === '精简') {
+      stateBar.innerHTML = `正在处理 ${queueLength} 张图片`;
+    } else {
+      stateBar.innerHTML = `正在处理 ${queueLength} 张图片<br><div style="font-size:10px;line-height:12px">当前模型：<br>${model}</div>`;
+
+    }
+
   }
 
   function showErrorStateBar() {
+    if (isShowError) {
+      return
+    }
+    isShowError = true
     stateBar.style.display = "block";
-
     stateBar.innerHTML =
+<<<<<<< HEAD
       '<span class="msg">本机后台AI画质修复程序未运行，请检查后台程序状态。 </span>';
     const linkArea = document.createElement("span");
     linkArea.innerHTML =
@@ -85,16 +123,24 @@ import GM_config from "./gm_config";
     launchBackAppLink.href = "mangaAIRepairerBackend:a";
     launchBackAppLink.style.color = "blue";
     launchBackAppLink.addEventListener("click", function () {
+=======
+      `
+      <span class="msg">本机后台AI画质修复程序未运行，请检查后台程序状态。 </span>
+      <a href="https://greasyfork.org/zh-CN/scripts/483769-%E6%BC%AB%E7%94%BB%E7%BD%91%E7%AB%99%E7%94%BB%E8%B4%A8ai%E4%BF%AE%E5%A4%8D" style="color:blue" target="_blank">说明文档 <a/>
+      <a class="__callLink" href="mangaAIRepairerBackend:a" style="color:blue">尝试调起应用 <a/>
+      `;
+    stateBar.querySelector('.__callLink')!.addEventListener("click", function () {
+>>>>>>> 545b686d528c7a8eeb95a431ebbeea48848f8115
       stateBar.querySelector(".msg")!.innerHTML =
-        "如果应用未启动则需安装应用。详情见文档。 ";
+        "如果应用未启动则需安装应用。如果更新后无法调起后端应用请重新执行安装脚本。详情见文档。 ";
     });
-    linkArea.appendChild(launchBackAppLink);
   }
 
   function handleImg(img: HTMLImageElement) {
     if (img.dataset.handled) {
       return;
     }
+
     queueLength++;
     refreshStateBar();
 
@@ -111,17 +157,36 @@ import GM_config from "./gm_config";
         const blob = r.response;
         const oFileReader = new FileReader();
         oFileReader.onloadend = function () {
+<<<<<<< HEAD
           const base64 = oFileReader.result;
+=======
+          let base64 = oFileReader.result;
+
+          let model: string = gmc.fields.model.value;
+
+          if (model.indexOf('realesrgan-x4plus-anime') !== -1) {
+            model = 'realesrgan-x4plus-anime'
+          } else {
+            model = 'realesr-animevideov3'
+          }
+
+          let scale = gmc.fields.scale.value;
+
+
+>>>>>>> 545b686d528c7a8eeb95a431ebbeea48848f8115
           GM_xmlhttpRequest({
             method: "POST",
             url: "http://localhost:31485/handle_img",
             headers: {
               "Content-Type": "application/json; charset=UTF-8",
             },
-            data: JSON.stringify({ data: base64, level: scale, scale }),
+            data: JSON.stringify({ data: base64, level: scale, scale, model }),
             // data: `{"data":"${base64}"}`,
             onload: function (r) {
-              img.src = "data:image/jpg;base64," + r.response;
+              const token = r.response
+              img.src = `http://127.0.0.1:31485/get_img?token=${token}`
+              // img.src = "https://cdn.britannica.com/84/73184-050-05ED59CB/Sunflower-field-Fargo-North-Dakota.jpg"
+              // img.src = "data:image/webp;base64," + r.response;
               queueLength--;
               refreshStateBar();
             },
@@ -142,10 +207,16 @@ import GM_config from "./gm_config";
   function checkAlive() {
     return new Promise<void>((res, rej) => {
       try {
+        // todo 设置timeout
         GM_xmlhttpRequest({
           method: "GET",
           url: "http://localhost:31485",
+<<<<<<< HEAD
           onload: function () {
+=======
+          timeout: 1000,
+          onload: function (r) {
+>>>>>>> 545b686d528c7a8eeb95a431ebbeea48848f8115
             res();
           },
           onerror: function () {
@@ -166,7 +237,7 @@ import GM_config from "./gm_config";
   stateBar.style.fontSize = "14px";
   stateBar.style.display = "none";
   stateBar.style.left = "20px";
-  stateBar.style.bottom = "40px";
+  stateBar.style.bottom = "70px";
 
   document.body.appendChild(stateBar);
 
@@ -184,7 +255,7 @@ import GM_config from "./gm_config";
   toolBar.style.opacity = "0.5";
   toolBar.style.display = "none";
   toolBar.style.marginLeft = "30px";
-  toolBar.style.marginTop = "150px";
+  toolBar.style.marginTop = "100px";
 
   const hover = document.createElement("div");
   hover.style.width = "200px";
@@ -206,7 +277,7 @@ import GM_config from "./gm_config";
   });
 
   gmc.onInit = () => {
-    scale = gmc.fields.scale.value;
+
     checkAlive()
       .then(() => {
         stop = false;
@@ -219,8 +290,12 @@ import GM_config from "./gm_config";
       if (!stop) {
         const allImg = Array.from(document.getElementsByTagName("img"));
         allImg.forEach((img) => {
+<<<<<<< HEAD
 
           if (img.offsetWidth >= 500 && !img.src.match(/.*\.gif/) && !img.dataset.handled) {
+=======
+          if (img.offsetWidth >= 400 && !img.src.match(/.*\.gif/) && !img.dataset.handled) {
+>>>>>>> 545b686d528c7a8eeb95a431ebbeea48848f8115
             waitImg(img, handleImg);
             // console.log(img)
           }
@@ -232,13 +307,23 @@ import GM_config from "./gm_config";
     setInterval(() => {
       checkAlive()
         .then(() => {
+
+          if (stop) {
+            stateBar.style.display = 'none'
+          }
+
           stop = false;
+          isShowError = false
         })
         .catch(() => {
           stop = true;
           showErrorStateBar();
-
         });
     }, 1000);
+
+    GM_registerMenuCommand('AI缩放选项', function () {
+      gmc.open()
+    })
+
   };
 })();
