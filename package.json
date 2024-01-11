@@ -25,6 +25,9 @@
     "@types/prettier": "^2.7.0",
     "@types/tampermonkey": "^4.0.5",
     "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "eslint": "^8.56.0",
     "prettier": "^2.7.1",
     "terser-webpack-plugin": "^5.3.6",
     "ts-loader": "^9.2.6",
@@ -35,20 +38,23 @@
     "webpack-merge": "^5.8.0"
   },
   "userscript": {
-    "name":"漫画网站画质AI修复",
-    "author":"call_duck",
+    "name": "漫画网站画质AI修复",
+    "author": "call_duck",
     "require-template": "https://cdn.jsdelivr.net/npm/${dependencyName}@${dependencyVersion}",
     "namespace": "http://tampermonkey.net/",
     "license": "https://opensource.org/licenses/MIT",
     "match": [
-      "https://www.manhuagui.com/comic/**"
+      "https://www.manhuagui.com/comic/**",
+      "https://manhuabika.com/pchapter/**"
     ],
     "grant": [
-      "GM_xmlhttpRequest","GM_getValue","GM_setValue","GM.getValue","GM.setValue","GM_addStyle"
+      "GM_xmlhttpRequest",
+      "GM_getValue",
+      "GM_setValue",
+      "GM.getValue",
+      "GM.setValue",
+      "GM_addStyle"
     ],
-    "run-at":"document-end"
-  },
-  "dependencies": {
-
+    "run-at": "document-end"
   }
 }

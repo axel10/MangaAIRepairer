@@ -1,11 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import GM_config from "./gm_config";
 
 (function () {
   "use strict";
 
-  if (!location.href.match(/\/comic\/[0-9]+\/[0-9]+\.html/)) {
+  const urlRegs = [
+    /\/comic\/[0-9]+\/[0-9]+\.html/,
+    /\/pchapter\//
+  ]
+  let urlFlag = false
+  for (let index = 0; index < urlRegs.length; index++) {
+    const reg = urlRegs[index];
+    if (location.href.match(reg)) {
+      urlFlag = true
+    }
+  }
+  if (!urlFlag) {
     return
   }
+
+  console.log(1)
+
+  // if (!location.href.match(/\/comic\/[0-9]+\/[0-9]+\.html/)) {
+  //   return
+  // }
 
   let queueLength = 0;
   let stop = true;
@@ -34,7 +52,7 @@ import GM_config from "./gm_config";
 
   GM_addStyle("#MyConfig {width:auto!important;height:auto!important;}");
 
-  function waitImg(img: HTMLImageElement, fun: Function) {
+  function waitImg(img: HTMLImageElement, fun: (...args: any[]) => void) {
     setTimeout(() => {
       if (img && img.complete) {
         fun(img);
@@ -58,11 +76,11 @@ import GM_config from "./gm_config";
 
     stateBar.innerHTML =
       '<span class="msg">本机后台AI画质修复程序未运行，请检查后台程序状态。 </span>';
-    var linkArea = document.createElement("span");
+    const linkArea = document.createElement("span");
     linkArea.innerHTML =
       '<a href="https://greasyfork.org/zh-CN/scripts/483769-%E6%BC%AB%E7%94%BB%E7%BD%91%E7%AB%99%E7%94%BB%E8%B4%A8ai%E4%BF%AE%E5%A4%8D" style="color:blue" target="_blank">说明文档 <a/>';
     stateBar.appendChild(linkArea);
-    var launchBackAppLink = document.createElement("a");
+    const launchBackAppLink = document.createElement("a");
     launchBackAppLink.innerHTML = "尝试调起应用 ";
     launchBackAppLink.href = "mangaAIRepairerBackend:a";
     launchBackAppLink.style.color = "blue";
@@ -83,17 +101,17 @@ import GM_config from "./gm_config";
     img.style.width = `${img.offsetWidth}px`;
 
     img.dataset.handled = "true";
-    let host = window.location.origin + "/";
+    const host = window.location.origin + "/";
     GM_xmlhttpRequest({
       method: "GET",
       url: img.src,
       headers: { referer: host },
       responseType: "blob",
       onload: function (r) {
-        var blob = r.response;
-        let oFileReader = new FileReader();
+        const blob = r.response;
+        const oFileReader = new FileReader();
         oFileReader.onloadend = function () {
-          let base64 = oFileReader.result;
+          const base64 = oFileReader.result;
           GM_xmlhttpRequest({
             method: "POST",
             url: "http://localhost:31485/handle_img",
@@ -127,10 +145,10 @@ import GM_config from "./gm_config";
         GM_xmlhttpRequest({
           method: "GET",
           url: "http://localhost:31485",
-          onload: function (r) {
+          onload: function () {
             res();
           },
-          onerror: function (e) {
+          onerror: function () {
             rej();
           },
         });
@@ -140,7 +158,7 @@ import GM_config from "./gm_config";
     });
   }
 
-  var stateBar = document.createElement("div");
+  const stateBar = document.createElement("div");
   stateBar.style.position = "fixed";
   stateBar.style.border = "1px solid #333";
   stateBar.style.padding = "8px";
@@ -201,12 +219,14 @@ import GM_config from "./gm_config";
       if (!stop) {
         const allImg = Array.from(document.getElementsByTagName("img"));
         allImg.forEach((img) => {
-          if (img.offsetWidth >= 500) {
+
+          if (img.offsetWidth >= 500 && !img.src.match(/.*\.gif/) && !img.dataset.handled) {
             waitImg(img, handleImg);
+            // console.log(img)
           }
         });
       }
-    }, 300);
+    }, 1000);
 
     // 检测后台是否存活
     setInterval(() => {
